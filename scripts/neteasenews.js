@@ -1,85 +1,76 @@
 const cookieName = '网易新闻'
 const cookieKey = 'chavy_cookie_neteasenews'
 const bodyKey = 'chavy_body_neteasenews'
-const chavy = init()
-const cookieVal = JSON.parse(chavy.getdata(cookieKey))
-const bodyVal = chavy.getdata(bodyKey)
+const $nobyda = nobyda();
+const cookieVal = JSON.parse($nobyda.read(cookieKey))
+const bodyVal = $nobyda.read(bodyKey)
 
-sign()
 
-function sign() {
-  if (bodyVal) {
-    let url = { url: `https://c.m.163.com/uc/api/sign/v3/commit`, headers: cookieVal }
-    url.body = bodyVal
-    chavy.post(url, (error, response, data) => {
-      chavy.log(`${cookieName}, data: ${data}`)
-      let result = JSON.parse(data)
-      const title = `${cookieName}`
-      let subTitle = ``
-      let detail = ``
+if (bodyVal=='') {
+  $nobyda.notify("配置错误, 无法读取body️", "", "")
+  $nobyda.end()
+} else {
+  checkin()
+  $nobyda.end()
+}
+
+function checkin() {
+  const neteasenews = {
+    url: 'https://c.m.163.com/uc/api/sign/v3/commit',
+    headers: cookieVal,
+    body: bodyVal
+  };
+  $nobyda.post(neteasenews, function(error, response, data) {
+  	let result = JSON.parse(data)
+    if (!error) {
       if (result.code == 200) {
-        subTitle = '签到结果: 成功'
-        detail = `连签: +${result.data.serialDays}, 金币: ${result.data.awardGoldCoin}, 说明: ${result.msg}`
-      } else if (result.code == 700) {
-        subTitle = '签到结果: 成功 (重复签到)'
-        detail = `说明: ${result.msg}`
+        console.log("neteasenews success response : \n" + data)
+        $nobyda.notify("网易新闻签到状态️", result.msg, "")
       } else {
-        subTitle = '签到结果: 失败'
-        detail = `编码: ${result.code}, 说明: ${result.msg}`
+        console.log("neteasenews failed response : \n" + data)
+        if (result.code == 700) {
+          $nobyda.notify("网易新闻签到状态️", result.msg, "")
+        } else {
+          $nobyda.notify("网易新闻 - 签到失败 ‼️", "", data)
+        }
       }
-      chavy.msg(title, subTitle, detail)
-    })
-  } else {
-    const title = `${cookieName}`
-    let subTitle = `签到结果: 失败`
-    let detail = `说明: body参数为空`
-    if (isQuanX()) detail += `, QuanX用户请手动抓包 body 参数!`
-    chavy.msg(title, subTitle, detail)
-  }
-
-  chavy.done()
+    } else {
+      $nobyda.notify("网易新闻 - 签到接口请求失败", "", error)
+    }
+  })
 }
 
-function init() {
-  isSurge = () => {
-    return undefined === this.$httpClient ? false : true
-  }
-  isQuanX = () => {
-    return undefined === this.$task ? false : true
-  }
-  getdata = (key) => {
-    if (isSurge()) return $persistentStore.read(key)
-    if (isQuanX()) return $prefs.valueForKey(key)
-  }
-  setdata = (key, val) => {
-    if (isSurge()) return $persistentStore.write(key, val)
-    if (isQuanX()) return $prefs.setValueForKey(key, val)
-  }
-  msg = (title, subtitle, body) => {
-    if (isSurge()) $notification.post(title, subtitle, body)
-    if (isQuanX()) $notify(title, subtitle, body)
-  }
-  log = (message) => console.log(message)
-  get = (url, cb) => {
-    if (isSurge()) {
-      $httpClient.get(url, cb)
+
+function nobyda() {
+    const isRequest = typeof $request != "undefined"
+    const isSurge = typeof $httpClient != "undefined"
+    const isQuanX = typeof $task != "undefined"
+    const notify = (title, subtitle, message) => {
+        if (isQuanX) $notify(title, subtitle, message)
+        if (isSurge) $notification.post(title, subtitle, message)
     }
-    if (isQuanX()) {
-      url.method = 'GET'
-      $task.fetch(url).then((resp) => cb(null, {}, resp.body))
+    const write = (value, key) => {
+        if (isQuanX) return $prefs.setValueForKey(value, key)
+        if (isSurge) return $persistentStore.write(value, key)
     }
-  }
-  post = (url, cb) => {
-    if (isSurge()) {
-      $httpClient.post(url, cb)
+    const read = (key) => {
+        if (isQuanX) return $prefs.valueForKey(key)
+        if (isSurge) return $persistentStore.read(key)
     }
-    if (isQuanX()) {
-      url.method = 'POST'
-      $task.fetch(url).then((resp) => cb(null, {}, resp.body))
+    const post = (options, callback) => {
+        if (isQuanX) {
+            if (typeof options == "string") options = { url: options }
+            options["method"] = "POST"
+            $task.fetch(options).then(response => {
+                response["status"] = response.statusCode
+                callback(null, response, response.body)
+            }, reason => callback(reason.error, null, null))
+        }
+        if (isSurge) $httpClient.post(options, callback)
     }
-  }
-  done = (value = {}) => {
-    $done(value)
-  }
-  return { isSurge, isQuanX, msg, log, getdata, setdata, get, post, done }
-}
+    const end = () => {
+        if (isQuanX) isRequest ? $done({}) : ""
+        if (isSurge) isRequest ? $done({}) : $done()
+    }
+    return { isRequest, isQuanX, isSurge, notify, write, read, post, end }
+};
