@@ -11,6 +11,9 @@
 1 0 * * * neteasenews.js
 ```
 
+# 招商银行信用卡签到（公众号）
+根据大神脚本修改而来，更新了最新接口
+
 ## 感谢
 
 [@NobyDa](https://github.com/NobyDa)
