@@ -44,10 +44,13 @@ if (isGetCookie) {
         const result = JSON.parse(response.body);
         if (result.respCode == 1000) {
             $notify("招商银行信用卡", "", "签到成功，获得 " + result.data.awardValue + " 积分🎁");
+            $done()
         } else if (result.respCode == 1452) {
             $notify("招商银行信用卡", "", "签到失败，请获取 cookie");
+            $done()
         } else if (result.respCode == 'custom_8500') {
             $notify("招商银行信用卡", "", "签到失败，" + result.respMsg);
+            $done()
         } else {
             $notify("招商银行信用卡", "", "签到失败，请查看日志");
             console.log(response.body)
