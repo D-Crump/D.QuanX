@@ -38,6 +38,7 @@ function checkin() {
       $nobyda.notify("网易新闻 - 签到接口请求失败", "", error)
     }
   })
+  $nobyda.end()
 }
 
 
