@@ -8,7 +8,7 @@
 https://weclub\.xyk\.cmbchina.com/SCRMCustomActivityFront/checkin-plus/request/get-home-data\.json\?activityCode=checkinPlus url script-request-header cmbchina.js
 
 [mitm]
-hostname = weclub.ccc.cmbchina.com
+hostname = weclub.xyk.cmbchina.com
 */
 
 const checkinURL = 'https://weclub.xyk.cmbchina.com/SCRMCustomActivityFront/checkin-plus/request/checkin.json';
