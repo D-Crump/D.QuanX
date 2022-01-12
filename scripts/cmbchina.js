@@ -51,6 +51,7 @@ if (isGetCookie) {
         } else {
             $notify("招商银行信用卡", "", "签到失败，请查看日志");
             console.log(response.body)
+            $done()
         }
     }, reason => {
         $notify("招商银行信用卡", "", reason.error)
