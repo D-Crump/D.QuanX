@@ -5,10 +5,10 @@ const $nobyda = nobyda();
 const cookieVal = JSON.parse($nobyda.read(cookieKey))
 const bodyVal = $nobyda.read(bodyKey)
 
-
-if (bodyVal=='') {
-  $nobyda.notify("配置错误, 无法读取body️", "", "")
-  $nobyda.end()
+if (!cookieVal || !bodyVal) {
+    console.log("请获取Cookie")
+    $nobyda.notify("网易新闻", "签到失败", "请获取Cookie")
+    $nobyda.end()
 } else {
   checkin()
   $nobyda.end()
@@ -24,15 +24,17 @@ function checkin() {
   	let result = JSON.parse(data)
     if (!error) {
       if (result.code == 200) {
+        $nobyda.notify("网易新闻", result.msg, '连续签到：${result.data.serialDays}天，金币: ${result.data.awardGoldCoin}')
         console.log("neteasenews success response : \n" + data)
-        $nobyda.notify("网易新闻签到状态️", result.msg, "")
+        $done()
       } else {
-        console.log("neteasenews failed response : \n" + data)
         if (result.code == 700) {
-          $nobyda.notify("网易新闻签到状态️", result.msg, "")
+          $nobyda.notify("网易新闻", "今天已经签过到", "");
         } else {
           $nobyda.notify("网易新闻 - 签到失败 ‼️", "", data)
         }
+        console.log("neteasenews failed response : \n" + data)
+        $done()
       }
     } else {
       $nobyda.notify("网易新闻 - 签到接口请求失败", "", error)
