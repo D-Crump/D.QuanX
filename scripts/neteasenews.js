@@ -24,7 +24,7 @@ function checkin() {
   	let result = JSON.parse(data)
     if (!error) {
       if (result.code == 200) {
-        $nobyda.notify("网易新闻", result.msg, '连续签到：${result.data.serialDays}天，金币: ${result.data.awardGoldCoin}')
+        $nobyda.notify("网易新闻", "签到成功", "")
         console.log("neteasenews success response : \n" + data)
         $done()
       } else {
