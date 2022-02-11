@@ -1,0 +1,7 @@
+# NAME: XunLei copyright
+# UPDATED: 2022-02-11 09:33:27
+# TOTAL: 3
+#迅雷版权问题
+host, hub5idx.v6.shub.sandai.net, reject
+host, hub5emu.v6.shub.sandai.net, reject
+host, hub5btmain.v6.shub.sandai.net, reject
